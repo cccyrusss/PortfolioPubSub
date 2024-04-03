@@ -55,14 +55,11 @@ public class PortfolioPublisher extends Thread {
                 Stock stock = entry.getKey();
                 long timeInterval = entry.getValue() - lastPublishTime;
                 double stockMove = Calculator.calculateStockMove(stock, timeInterval);
-//                System.out.println("Publisher - Sleeping for " + timeInterval + " ms");
                 Thread.sleep(timeInterval);
                 synchronized (portfolio) {
                     stock.priceMove(stockMove);
-//                    System.out.println("Publisher - " + stock + " price changed to " + stock.getPrice());
                     for (Option option : options.get(stock)) {
                         option.setPrice(Calculator.priceOption(option, stock));
-//                        System.out.println("Publisher - Associated option " + option + " price changed to " + option.getPrice());
                     }
                     publish(Collections.singletonList(stock));
                 }
@@ -95,7 +92,7 @@ public class PortfolioPublisher extends Thread {
     }
 
     // Schedule next stock price change with PriorityQueue, worst case time complexity: O(nlog(n))
-    private void schedule(Stock stock) {
+    protected void schedule(Stock stock) {
         scheduledStocks.add(new AbstractMap.SimpleEntry<>(stock, getRandomTimeInterval() + lastPublishTime));
     }
 
@@ -103,5 +100,9 @@ public class PortfolioPublisher extends Thread {
         portfolio.update();
         portfolio.notify();
         updatedStocks.addAll(stocks);
+    }
+
+    public Queue<AbstractMap.SimpleEntry<Stock, Long>> getScheduledStocks() {
+        return scheduledStocks;
     }
 }

@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class SecuritiesInfoParserTest {
     private static final String VALID_PATH = "jdbc:sqlite:db/securitiesInfo.db";
     private static final String EMPTY_DB_PATH = "jdbc:sqlite:db/empty.db";
-    private static final String WRONG_PATH = "jdbc:sqlite:db/wrong.db";
+    private static final String NOT_DB_PATH = "jdbc:sqlite:db/not_a_db";
     private static final String PATH_WITH_NO_DRIVER = "db/securitiesInfo.db";
 
     @Test
@@ -26,8 +26,8 @@ class SecuritiesInfoParserTest {
     }
 
     @Test
-    public void loadWrongDbPathReturnsNull() {
-        assertNull(SecuritiesInfoParser.loadSecuritiesInfo(WRONG_PATH));
+    public void loadNonDbPathReturnsNull() {
+        assertNull(SecuritiesInfoParser.loadSecuritiesInfo(NOT_DB_PATH));
     }
 
     @Test
