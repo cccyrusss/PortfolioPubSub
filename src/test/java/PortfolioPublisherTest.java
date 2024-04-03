@@ -19,8 +19,13 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PortfolioPublisherTest {
+    // Time interval in ms
+    private final int MIN_TIME_INTERVAL = 500;
+    private final int MAX_TIME_INTERVAL = 2000;
+
     private Map<String, Product> securitiesInfo;
     private Portfolio portfolio;
+
 
     @BeforeEach
     public void setUp() {
@@ -48,19 +53,30 @@ class PortfolioPublisherTest {
     }
 
     @Test
-    public void scheduleStocksSortedInitially() {
+    public void scheduledStocksSortedInitially() {
         PortfolioPublisher publisher = new PortfolioPublisher(portfolio, securitiesInfo, new ArrayList<>());
         assertEquals(3, publisher.getScheduledStocks().size());
         assertTrue(isSorted(publisher.getScheduledStocks()));
     }
 
     @Test
-    public void scheduleStocksSortedAfterRescheduled() {
+    public void scheduledStocksSortedAfterRescheduled() {
         PortfolioPublisher publisher = new PortfolioPublisher(portfolio, securitiesInfo, new ArrayList<>());
         for (int i = 0; i < new Random().nextInt(100); ++i) {
-            publisher.schedule(publisher.getScheduledStocks().poll().getKey());
+            schedule(publisher);
         }
         assertTrue(isSorted(publisher.getScheduledStocks()));
+    }
+
+    // Test if each scheduled stock is published within 500-2000 ms
+    @Test
+    public void scheduledStocksPublishedWithinTimeRange() {
+        PortfolioPublisher publisher = new PortfolioPublisher(portfolio, securitiesInfo, new ArrayList<>());
+        for (int i = 0; i < 1000; ++i) {
+            long previousPublishTime =  publisher.getScheduledStocks().peek().getValue();
+            long timeDiff = schedule(publisher) - previousPublishTime;
+            assertTrue(timeDiff >= MIN_TIME_INTERVAL && timeDiff <= MAX_TIME_INTERVAL);
+        }
     }
 
     private boolean isSorted(Queue<AbstractMap.SimpleEntry<Stock, Long>> scheduledStocks) {
@@ -73,5 +89,11 @@ class PortfolioPublisherTest {
             }
         }
         return true;
+    }
+
+    private long schedule(PortfolioPublisher portfolioPublisher) {
+        AbstractMap.SimpleEntry<Stock, Long> entry = portfolioPublisher.getScheduledStocks().poll();
+        portfolioPublisher.setLastPublishTime(entry.getValue());
+        return portfolioPublisher.schedule(entry.getKey());
     }
 }

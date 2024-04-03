@@ -92,8 +92,10 @@ public class PortfolioPublisher extends Thread {
     }
 
     // Schedule next stock price change with PriorityQueue, worst case time complexity: O(nlog(n))
-    protected void schedule(Stock stock) {
-        scheduledStocks.add(new AbstractMap.SimpleEntry<>(stock, getRandomTimeInterval() + lastPublishTime));
+    protected long schedule(Stock stock) {
+        long nextPublishTime = getRandomTimeInterval() + lastPublishTime;
+        scheduledStocks.add(new AbstractMap.SimpleEntry<>(stock, nextPublishTime));
+        return nextPublishTime;
     }
 
     private void publish(List<Stock> stocks) {
@@ -104,5 +106,9 @@ public class PortfolioPublisher extends Thread {
 
     public Queue<AbstractMap.SimpleEntry<Stock, Long>> getScheduledStocks() {
         return scheduledStocks;
+    }
+
+    public void setLastPublishTime(long lastPublishTime) {
+        this.lastPublishTime = lastPublishTime;
     }
 }
